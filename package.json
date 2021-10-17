@@ -1,0 +1,20 @@
+{
+  "name": "vrnft",
+  "version": "0.0.1",
+  "description": "Example of an NFT collection with verifiably-random rarity distribution",
+  "license": "MIT",
+  "scripts": {
+    "build": "hh compile"
+  },
+  "engines": {
+    "node": "14"
+  },
+  "dependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@openzeppelin/contracts": "^4.3.2",
+    "ethers": "^5.4.7",
+    "hardhat": "^2.6.6",
+    "hardhat-tracer": "^1.0.0-alpha.6"
+  }
+}
