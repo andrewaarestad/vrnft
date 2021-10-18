@@ -10,31 +10,60 @@ import "hardhat/console.sol";
  * @title VRNFT
  * @author @AndrewAarestad
  */
-contract VRNFT is ERC721Enumerable, ReentrancyGuard, Ownable {
+contract VRNFT is ERC721, ReentrancyGuard, Ownable {
     using Strings for uint256;
 
-    uint256 public constant MAX_TOKEN_ID = 8888;
+    uint256 public totalSupply;
 
+    bool public isRevealed = false;
     bool public publicSaleActive = false;
-    string private _imageUriPrefix;
-    string private _uriPrefix;
+    uint256 public nextTokenId = 1;
 
-    mapping(uint256 => string) private tokenSeeds;
+    mapping(uint256 => uint256) private rarityRankings;
 
-    constructor() ERC721("Verifiably-Random NFT", "VRNFT") {
-
-    }
-
-    function setBaseImageURI(string memory prefix) public onlyOwner {
-        _imageUriPrefix = prefix;
-    }
-
-    function setBaseURI(string memory prefix) public onlyOwner {
-        _uriPrefix = prefix;
+    constructor(uint256 _totalSupply) ERC721("Verifiably-Random NFT", "VRNFT") {
+        totalSupply = _totalSupply;
     }
 
     function togglePublicSale() public onlyOwner {
         publicSaleActive = !publicSaleActive;
+    }
+
+    function reveal() public onlyOwner {
+        require(!isRevealed, "Already revealed");
+        isRevealed = true;
+//        console.log('reveal check: nextTokenId=%s, totalSupply=%s', nextTokenId, totalSupply);
+//        require(nextTokenId > totalSupply, "Cannot reveal until all tokens are minted");
+    }
+
+    function mint(address _to, uint256 _amount) public virtual nonReentrant {
+        require(publicSaleActive, "Public sale is not active");
+        uint256 _nextTokenId = nextTokenId;
+        require(_nextTokenId + _amount <= totalSupply + 1, 'not enough tokens available');
+        for (uint256 i; i < _amount; i++) {
+            _safeMint(_to, _nextTokenId);
+            _nextTokenId++;
+        }
+        nextTokenId = _nextTokenId;
+    }
+
+    function getRarityRank(uint256 tokenId) public view returns (uint256) {
+        return rarityRankings[tokenId];
+    }
+
+    function getRarityLevel(uint256 tokenId) public view returns (string memory) {
+        uint256 rank = getRarityRank(tokenId);
+        if (rank == 0) {
+            return "Unrevealed";
+        } else if (rank < 11) {
+            return "Legendary";
+        } else if (rank < 101) {
+            return "Rare";
+        } else if (rank < 1001) {
+            return "Uncommon";
+        } else {
+            return "Common";
+        }
     }
 
 
