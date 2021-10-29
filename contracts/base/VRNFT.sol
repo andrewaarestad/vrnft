@@ -21,16 +21,31 @@ contract VRNFT is ERC721, ReentrancyGuard, Ownable, VRFConsumerBase {
     VRFConsumerBase(_vrfCoordinator, _linkToken)
     ERC721(name, symbol) {
 
+//        console.log('requesting randomness from coordinator address: %s', _vrfCoordinator);
     }
 
     function fulfillRandomness(bytes32 /*requestId*/, uint256 randomness) internal override {
 //        reqId = requestId;
+
+
+        console.log('fulfillRandomness: %s', randomness);
+
         rarityRandomness = randomness;
+
+        isRevealed = true;
     }
 
     function reveal() public onlyOwner {
         require(!isRevealed, "Already revealed");
-        isRevealed = true;
+
+        console.log('revealing');
+
+        uint256 fee = 0.1 * 10 ** 18; //0.1 LINK
+        bytes32 keyHash = 0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4;
+
+
+        requestRandomness(keyHash, fee);
+
 //        console.log('reveal check: nextTokenId=%s, totalSupply=%s', nextTokenId, totalSupply);
 //        require(nextTokenId > totalSupply, "Cannot reveal until all tokens are minted");
 
