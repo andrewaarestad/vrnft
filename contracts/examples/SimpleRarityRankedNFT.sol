@@ -35,7 +35,12 @@ contract SimpleRarityRankedNFT is VRNFT {
     }
 
     function getRarityRank(uint256 tokenId) public view returns (uint256) {
-        return rarityRankings[tokenId];
+
+        if (rarityRandomness == 0) {
+            return 0;
+        } else {
+            return (tokenId + rarityRandomness) % 10000;
+        }
     }
 
     function getRarityLevel(uint256 tokenId) public view returns (string memory) {
