@@ -14,6 +14,7 @@ import "hardhat/console.sol";
 contract VRNFT is ERC721, ReentrancyGuard, Ownable, VRFConsumerBase {
 
     bool public isRevealed = false;
+    bool public isAwaitingReveal = false;
 
     uint256 private rarityRandomness = 0;
 
@@ -37,14 +38,17 @@ contract VRNFT is ERC721, ReentrancyGuard, Ownable, VRFConsumerBase {
 
     function reveal() public onlyOwner {
         require(!isRevealed, "Already revealed");
+        require(!isAwaitingReveal, "Reveal already in progress");
 
-        console.log('revealing');
+//        console.log('revealing');
 
         uint256 fee = 0.1 * 10 ** 18; //0.1 LINK
         bytes32 keyHash = 0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4;
 
 
         requestRandomness(keyHash, fee);
+
+        isAwaitingReveal = true;
 
 //        console.log('reveal check: nextTokenId=%s, totalSupply=%s', nextTokenId, totalSupply);
 //        require(nextTokenId > totalSupply, "Cannot reveal until all tokens are minted");
