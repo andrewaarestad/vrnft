@@ -14,6 +14,7 @@ contract SimpleRarityRankedNFT is VRNFT {
     uint256 public nextTokenId = 1;
 
     uint256[] public tokenIds;
+    bool private isShuffled = false;
 
     mapping(uint256 => uint256) private rarityRankings;
 
@@ -54,16 +55,21 @@ contract SimpleRarityRankedNFT is VRNFT {
 
     // Fisher-Yates shuffle
     function shuffle(uint256 seed) private {
-        uint256[] memory randomValues = expand(seed, totalSupply);
+        if (!isShuffled) {
+            isShuffled = true;
 
-        uint temp;
-        for (uint ii=0; ii<tokenIds.length; ii++) {
-//        for (uint ii = tokenIds.length - 1; ii > 0; ii--) {
-            uint j = randomValues[ii] % (tokenIds.length - ii);
-            temp = tokenIds[ii];
-            tokenIds[ii] = tokenIds[j];
-            tokenIds[j] = temp;
+            uint256[] memory randomValues = expand(seed, totalSupply);
+
+            uint temp;
+            for (uint ii=0; ii<tokenIds.length; ii++) {
+                //        for (uint ii = tokenIds.length - 1; ii > 0; ii--) {
+                uint j = randomValues[ii] % (tokenIds.length - ii);
+                temp = tokenIds[ii];
+                tokenIds[ii] = tokenIds[j];
+                tokenIds[j] = temp;
+            }
         }
+
     }
 
     function expand(uint256 randomValue, uint256 n) public pure returns (uint256[] memory expandedValues) {
