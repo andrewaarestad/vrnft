@@ -13,6 +13,8 @@ contract SimpleRarityRankedNFT is VRNFT {
     bool public publicSaleActive = false;
     uint256 public nextTokenId = 1;
 
+    uint256[] public tokenIds;
+
     mapping(uint256 => uint256) private rarityRankings;
 
     constructor(address _vrfCoordinator, address _link, uint256 _totalSupply) VRNFT(_vrfCoordinator, _link, "Simple Rarity Ranked NFT", "SRRNFT") {
@@ -29,6 +31,7 @@ contract SimpleRarityRankedNFT is VRNFT {
         require(_nextTokenId + _amount <= totalSupply + 1, 'not enough tokens available');
         for (uint256 i; i < _amount; i++) {
             _safeMint(_to, _nextTokenId);
+            tokenIds.push(_nextTokenId);
             _nextTokenId++;
         }
         nextTokenId = _nextTokenId;
@@ -36,11 +39,39 @@ contract SimpleRarityRankedNFT is VRNFT {
 
     function getRarityRank(uint256 tokenId) public view returns (uint256) {
 
-        if (rarityRandomness == 0) {
+        if (!isRevealed) {
+            return 0;
+        } else if (tokenId > totalSupply) {
             return 0;
         } else {
-            return (tokenId + rarityRandomness) % 10000;
+            return tokenIds[tokenId];
         }
+    }
+
+    function onReveal() internal override {
+        shuffle(rarityRandomness);
+    }
+
+    // Fisher-Yates shuffle
+    function shuffle(uint256 seed) private {
+        uint256[] memory randomValues = expand(seed, totalSupply);
+
+        uint temp;
+        for (uint ii=0; ii<tokenIds.length; ii++) {
+//        for (uint ii = tokenIds.length - 1; ii > 0; ii--) {
+            uint j = randomValues[ii] % (tokenIds.length - ii);
+            temp = tokenIds[ii];
+            tokenIds[ii] = tokenIds[j];
+            tokenIds[j] = temp;
+        }
+    }
+
+    function expand(uint256 randomValue, uint256 n) public pure returns (uint256[] memory expandedValues) {
+        expandedValues = new uint256[](n);
+        for (uint256 i = 0; i < n; i++) {
+            expandedValues[i] = uint256(keccak256(abi.encode(randomValue, i)));
+        }
+        return expandedValues;
     }
 
     function getRarityLevel(uint256 tokenId) public view returns (string memory) {

@@ -16,7 +16,9 @@ contract VRNFT is ERC721, ReentrancyGuard, Ownable, VRFConsumerBase {
     bool public isRevealed = false;
     bool public isAwaitingReveal = false;
 
-    uint256 private rarityRandomness = 0;
+    uint256 internal rarityRandomness = 0;
+
+    function onReveal() virtual internal {}
 
     constructor(address _vrfCoordinator, address _linkToken, string memory name, string memory symbol)
     VRFConsumerBase(_vrfCoordinator, _linkToken)
@@ -34,6 +36,8 @@ contract VRNFT is ERC721, ReentrancyGuard, Ownable, VRFConsumerBase {
         rarityRandomness = randomness;
 
         isRevealed = true;
+
+        onReveal();
     }
 
     function reveal() public onlyOwner {
